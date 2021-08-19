@@ -1,20 +1,10 @@
 package moe.irony.simplepc.parser
 
 import moe.irony.simplepc.instances.Option
-import moe.irony.simplepc.parser.Parser.Companion.`*≻`
-import moe.irony.simplepc.parser.Parser.Companion.`≺$≻`
-import moe.irony.simplepc.parser.Parser.Companion.`≺*`
-import moe.irony.simplepc.parser.Parser.Companion.`≺*≻`
-import moe.irony.simplepc.parser.Parser.Companion.`≺|≻`
-import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
-import moe.irony.simplepc.parser.Parser.Companion.pure
 import moe.irony.simplepc.types.HKT
 import moe.irony.simplepc.types.Monad
-import moe.irony.simplepc.types.Tuple0
 import moe.irony.simplepc.utils.Trampoline
 import moe.irony.simplepc.utils.`$$`
-import moe.irony.simplepc.utils.cons
-import moe.irony.simplepc.utils.yCombinator
 
 // Mainly referenced from: https://academy.realm.io/posts/tryswift-yasuhiro-inami-parser-combinator/
 
@@ -67,6 +57,9 @@ class Parser<A>(val parser: (ParseState) -> Trampoline<Option<Pair<A, ParseState
 
         infix fun <A, B> ((A) -> B).`≺$≻`(p: HKT<Parser<*>, A>): HKT<Parser<*>, B> =
             fmap(p, this)
+
+        fun <A, B, C> (HKT<Parser<*>, A>).combine(p: HKT<Parser<*>, B>, f: (A, B) -> C): HKT<Parser<*>, C> =
+            this `≻≻=` { a -> p `≻≻=` { b -> pure(f.invoke(a, b)) }}
 
         // Alternative choice (associative operation)
         fun <A> alt(p: HKT<Parser<*>, A>, q: HKT<Parser<*>, A>): HKT<Parser<*>, A> =

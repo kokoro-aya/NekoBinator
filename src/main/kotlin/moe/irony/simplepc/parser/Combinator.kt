@@ -7,6 +7,7 @@ import moe.irony.simplepc.parser.Parser.Companion.`≺*`
 import moe.irony.simplepc.parser.Parser.Companion.`≺*≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺|≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
+import moe.irony.simplepc.parser.Parser.Companion.combine
 import moe.irony.simplepc.types.HKT
 import moe.irony.simplepc.types.Tuple0
 import moe.irony.simplepc.utils.Trampoline
@@ -33,7 +34,7 @@ fun matchChar(c: Char): Parser<Char> = satisfy { it == c }
 fun spaces(): Parser<Char> = satisfy { it.isWhitespace() }
 
 fun matchString(str: String): HKT<Parser<*>, String> =
-    if (str.isEmpty()) Parser.pure(str)
+    if (str.isEmpty()) Parser.pure(str) // 这里不能用Parser.empty()否则会出现None导致整个调用栈被污染
     else matchChar(str.first()) `≻≻=` { c -> matchString(str.drop(1)) `≻≻=` { cs -> Parser.pure(c + cs) } }
 
 
@@ -78,3 +79,8 @@ fun symbol(str: String): HKT<Parser<*>, String> =
 fun natural(): HKT<Parser<*>, Int> =
     skipSpaces() `*≻` ({
             ll: List<Char> -> ll.foldRight(0) { i, x -> x * 10 + (i - '0') } } `≺$≻` many1(isDigit())) `≺*` skipSpaces()
+
+fun real(): HKT<Parser<*>, Double> =
+    skipSpaces() `*≻` natural().combine({ ll: List<Char> ->
+        ll.foldRight(0.0 to 0.1) { i, (x, y) -> x + y * (i - '0').toDouble() to y * 0.1 }.first } `≺$≻`
+            (matchChar('.') `*≻` many1(isDigit())) `≺*` skipSpaces(), Int::plus) `≺|≻` ((Int::toDouble) `≺$≻` natural())
