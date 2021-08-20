@@ -18,6 +18,10 @@ sealed class Option<out A>: HKT<Option<*>, @UnsafeVariance A> {
             if (other !is Some<*>) return false
             return other.value == this.value
         }
+
+        override fun hashCode(): Int {
+            return value?.hashCode() ?: 0
+        }
     }
 
     companion object: Monad<Option<*>>, Functor<Option<*>> {

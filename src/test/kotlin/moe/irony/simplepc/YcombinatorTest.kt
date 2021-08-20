@@ -1,3 +1,5 @@
+package moe.irony.simplepc
+
 import moe.irony.simplepc.utils.yCombinator
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test

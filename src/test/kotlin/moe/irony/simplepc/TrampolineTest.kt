@@ -1,3 +1,5 @@
+package moe.irony.simplepc
+
 import moe.irony.simplepc.utils.Trampoline
 import moe.irony.simplepc.utils.`≻≻=`
 import org.junit.jupiter.api.Assertions.assertEquals

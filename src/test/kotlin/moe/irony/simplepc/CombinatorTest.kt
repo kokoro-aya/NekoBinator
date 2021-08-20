@@ -1,3 +1,5 @@
+package moe.irony.simplepc
+
 import moe.irony.simplepc.instances.Option
 import moe.irony.simplepc.parser.*
 import org.junit.jupiter.api.Assertions.*

@@ -1,9 +1,10 @@
+package moe.irony.simplepc
+
 import moe.irony.simplepc.instances.Option
 import moe.irony.simplepc.parser.ParseState
 import moe.irony.simplepc.parser.Parser
 import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
 import moe.irony.simplepc.utils.Trampoline
-import moe.irony.simplepc.utils.`≻≻=`
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

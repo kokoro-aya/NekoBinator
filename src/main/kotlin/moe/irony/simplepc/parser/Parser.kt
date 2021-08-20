@@ -89,7 +89,6 @@ class Parser<A>(val parser: (ParseState) -> Trampoline<Option<Pair<A, ParseState
         // Sequence actions, discarding the value of the first argument
         infix fun <A, B> HKT<Parser<*>, A>.`*≻`(q: HKT<Parser<*>, B>): HKT<Parser<*>, B> =
             this `≻≻=` { _ -> q `≻≻=` { b -> Parser.pure(b) } }
-
     }
 }
 
@@ -97,16 +96,3 @@ class Parser<A>(val parser: (ParseState) -> Trampoline<Option<Pair<A, ParseState
 fun <A> recur(f: () -> HKT<Parser<*>, A>): HKT<Parser<*>, A> = Parser { ps ->
     Trampoline.more { Parser.narrow(f.invoke()).parser.invoke(ps) }
 }
-
-//fun fac(f: (Long) -> Long): (Long) -> Long =
-//    { x -> if (x <= 1) 1 else x * f(x - 1) }
-//fun fib(f: (Int) -> Int): (Int) -> Int =
-//    { x -> if (x <= 2) 1 else f(x - 1) + f(x - 2) }
-//fun reverse(f: (String) -> String): (String) -> String =
-//    { s -> if (s.isEmpty()) "" else s.last() + f(s.dropLast(1)) }
-//
-//fun main() {
-//    println(yCombinator(::fac)(19))
-//    println(yCombinator(::fib)(17))
-//    println(yCombinator(::reverse)("Recursion"))
-//}

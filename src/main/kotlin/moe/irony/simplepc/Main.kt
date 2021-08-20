@@ -1,19 +1,22 @@
 package moe.irony.simplepc
 
 import moe.irony.simplepc.calculator.parseInt
-import moe.irony.simplepc.parser.Parser
-import moe.irony.simplepc.parser.many
-import moe.irony.simplepc.parser.matchString
-import moe.irony.simplepc.parser.replicate
+import moe.irony.simplepc.parser.*
+import moe.irony.simplepc.parser.Parser.Companion.`*≻`
+import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
+import moe.irony.simplepc.parser.Parser.Companion.pure
+import moe.irony.simplepc.types.HKT
+import moe.irony.simplepc.utils.`≻≻=`
+
+fun isEven(): Parser<Boolean> = TODO("Not implemented yet")
 
 fun main() {
-    println(parseInt("11 + 45"))
-    println(parseInt("27 - 69"))
-    println(parseInt("33 * 7"))
-    println(parseInt("48 / 20"))
+//    (0 until 100).forEach {
+//        println(isEven().parse(it.toString()))
+//    }
+    val p = Parser.narrow(tryAndThen(matchString("foo"), matchString("bar"),
+        String::plus) { it })
 
-    println(Parser.narrow(replicate(3, matchString("foo"))).parse("foofoofoo"))
-    println(Parser.narrow(many(matchString("foo"))).parse("foo"))
-    println(Parser.narrow(many(matchString("foo"))).parse("foofoo"))
-    println(Parser.narrow(many(matchString("foo"))).parse("bar"))
+    println(p.parse("bar"))
+    println(p.parse("foobar"))
 }
