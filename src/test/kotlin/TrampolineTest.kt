@@ -1,5 +1,5 @@
 import moe.irony.simplepc.utils.Trampoline
-import moe.irony.simplepc.utils.`$$`
+import moe.irony.simplepc.utils.`≻≻=`
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTimeout
 import org.junit.jupiter.api.Test
@@ -21,8 +21,8 @@ class TrampolineTest {
         assertEquals(832040, object {
             fun fib(i: Int): Trampoline<Int> =
                 if (i <= 1) Trampoline.done(i)
-                else Trampoline.more { fib(i - 1) } `$$` { x ->
-                    Trampoline.more { fib(i - 2) } `$$` { y ->
+                else Trampoline.more { fib(i - 1) } `≻≻=` { x ->
+                    Trampoline.more { fib(i - 2) } `≻≻=` { y ->
                         Trampoline.done(x + y)
                     }
                 }
@@ -30,7 +30,7 @@ class TrampolineTest {
         assertEquals(2147450880, object {
             fun sum(i: Int): Trampoline<Int> =
                 if (i <= 0) Trampoline.done(i)
-                else Trampoline.more { sum(i - 1) } `$$` { x ->
+                else Trampoline.more { sum(i - 1) } `≻≻=` { x ->
                     Trampoline.done(i + x)
                 }
         }.sum(65535).run())

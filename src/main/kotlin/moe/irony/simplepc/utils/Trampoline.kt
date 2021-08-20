@@ -121,15 +121,15 @@ fun <T, U, V> ((T) -> U).andThen(after: (U) -> V): (T) -> V = { x ->
 
 
 
-infix fun <A, B> Trampoline<A>.`$$`(f: (A) -> Trampoline<B>): Trampoline<B> =
+infix fun <A, B> Trampoline<A>.`≻≻=`(f: (A) -> Trampoline<B>): Trampoline<B> =
     this.flatMap(f)
 
-infix fun <A, B> Trampoline<A>.`$$`(fb: () -> Trampoline<B>): Trampoline<B> =
+infix fun <A, B> Trampoline<A>.`≻≻=`(fb: () -> Trampoline<B>): Trampoline<B> =
     this.flatMap { fb.invoke() }
 
 private fun iterate(i: Int): Trampoline<String> =
     if (i <= 0) Trampoline.done("")
-    else Trampoline.more { iterate(i - 1) } `$$` { x ->
+    else Trampoline.more { iterate(i - 1) } `≻≻=` { x ->
         Trampoline.done(x + Random.nextInt('a'.toInt(), 'z'.toInt()).toChar() )
     }
 

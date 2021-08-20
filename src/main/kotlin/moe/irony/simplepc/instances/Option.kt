@@ -12,6 +12,12 @@ sealed class Option<out A>: HKT<Option<*>, @UnsafeVariance A> {
 
     class Some<A>(val value: A) : Option<A>() {
         override fun toString(): String = "[Some: $value]"
+
+        override fun equals(other: Any?): Boolean {
+            if (other === this) return true
+            if (other !is Some<*>) return false
+            return other.value == this.value
+        }
     }
 
     companion object: Monad<Option<*>>, Functor<Option<*>> {
