@@ -3,7 +3,11 @@ package moe.irony.simplepc
 import moe.irony.simplepc.parser.*
 import moe.irony.simplepc.parser.Parser.Companion.`≺$≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺*`
+import moe.irony.simplepc.parser.Parser.Companion.`≺|≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
+import moe.irony.simplepc.parser.Parser.Companion.empty
+import moe.irony.simplepc.parser.Parser.Companion.pure
+import moe.irony.simplepc.utils.`≻≻=`
 import moe.irony.simplepc.utils.constructString
 
 fun isEven(): Parser<Boolean> = TODO("Not implemented yet")
@@ -23,8 +27,28 @@ fun main() {
 //    println(p.parse("bar"))
 //    println(p.parse("foobar"))
 
+    println(Parser.narrow(many1(isDigit())).parse("1234abc"))
+    println(Parser.narrow(many1(isDigit())).parse("4567abc"))
+    println(Parser.narrow(many1(isDigit())).parse("89111abc"))
+
     println(Parser.narrow(bcString()).parse("5:abcd"))
     println(Parser.narrow(bcString()).parse("4:abcd"))
     println(Parser.narrow(bcString()).parse("3:abcd"))
+
+    println()
+
+    println(Parser.narrow(tryParse(matchString("abc")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("abcdefg"))
+    println(Parser.narrow(tryParse(matchString("abc")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("defg"))
+
+    println()
+
+    println(Parser.narrow(tryParse(matchString("abc"))).parse("abcdefg"))
+    println(Parser.narrow(tryParse(matchString("abc"))).parse("defg"))
+
+    println()
+
+    println(Parser.narrow((matchString("") `≺|≻` matchString("abc")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("abcdefg"))
+
+    println(Parser.narrow((matchString("") `≺|≻` matchString("abc")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("defg"))
 
 }

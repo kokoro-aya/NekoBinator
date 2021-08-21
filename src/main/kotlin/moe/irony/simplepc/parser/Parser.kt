@@ -1,6 +1,7 @@
 package moe.irony.simplepc.parser
 
 import moe.irony.simplepc.instances.Option
+import moe.irony.simplepc.instances.Result
 import moe.irony.simplepc.types.HKT
 import moe.irony.simplepc.types.Monad
 import moe.irony.simplepc.utils.Trampoline
@@ -8,12 +9,12 @@ import moe.irony.simplepc.utils.`≻≻=`
 
 // Mainly referenced from: https://academy.realm.io/posts/tryswift-yasuhiro-inami-parser-combinator/
 
-class Parser<A>(val parser: (ParseState) -> Trampoline<Option<Pair<A, ParseState>>>): HKT<Parser<*>, A> {
+class Parser<A>(val parser: (ParseState) -> Trampoline<Result<Context<A>>>): HKT<Parser<*>, A> {
 
     fun runParser(s: ParseState) = parser.invoke(s)
 
-    fun parse(s: String): Option<A> = Option.narrow(
-        Option.flatMap((runParser(ParseState(s)).run())) { Option.pure(it.first) }
+    fun parse(s: String): Result<A> = Result.narrow(
+        Result.flatMap((runParser(ParseState(s)).run())) { Result.pure(it.result) }
     )
 
     companion object: Monad<Parser<*>> {
@@ -21,27 +22,42 @@ class Parser<A>(val parser: (ParseState) -> Trampoline<Option<Pair<A, ParseState
         fun <A> narrow(v: HKT<Parser<*>, A>): Parser<A> = v as Parser<A>
 
         // Applicative pure
-        override fun <A> pure(v: A): HKT<Parser<*>, A> = Parser { Trampoline.done(Option.Some(v to it)) }
+        override fun <A> pure(v: A): HKT<Parser<*>, A> = Parser { Trampoline.done(Result.Success(Context(it, consumed = false, v))) }
 
         // Alternative empty
-        fun <A> empty(): HKT<Parser<*>, A> = Parser { Trampoline.done(Option.None) }
+        fun <A> empty(): HKT<Parser<*>, A> = Parser { Trampoline.done(Result.Failure(FailContext(it, consumed = false, halted = false))) }
+
+        fun <A> attempt(p: HKT<Parser<*>, A>): HKT<Parser<*>, A> = // FIXED
+            Parser { ps ->
+                Parser.narrow(p).runParser(ps) `≻≻=` { res ->
+                    when (res) {
+                        is Result.Success -> Trampoline.done(res)
+                        is Result.Failure -> Trampoline.done(Result.Failure(FailContext(ps, consumed = false, res.coerceAbort())))
+                    }
+                }
+            }
 
         // Monad bind (>>=)
         override fun <A, B> flatMap(ma: HKT<Parser<*>, A>, f: (A) -> HKT<Parser<*>, B>): HKT<Parser<*>, B> =
             Parser { ps ->
                 narrow(ma).runParser(ps) `≻≻=` { res1 ->
                     when (res1) {
-                        is Option.Some -> {
-                            narrow(f.invoke(res1.value.first)).runParser(res1.value.second) `≻≻=` { res2 ->
+                        is Result.Success -> {
+                            narrow(f.invoke(res1.value.result)).runParser(res1.value.state) `≻≻=` { res2 ->
                                 Trampoline.more {
                                     when (res2) {
-                                        is Option.Some -> Trampoline.done(Option.Some(res2.value))
-                                        is Option.None -> Trampoline.done(Option.None)
+                                        is Result.Success -> Trampoline.done(
+                                            Result.Success(Context(res2.value.state, res1.value.consumed || res2.value.consumed, res2.value.result)))
+                                        is Result.Failure -> Trampoline.done(res2.let {
+                                            Result.Failure(FailContext(it.getParseState(), it.getConsumed() || res1.value.consumed, it.coerceAbort()))
+                                        })
                                     }
                                 }
                             }
                         }
-                        is Option.None -> Trampoline.done(Option.None)
+                        is Result.Failure -> Trampoline.done(res1.let {
+                            Result.Failure(FailContext(it.getParseState(), it.getConsumed(), it.coerceAbort()))
+                        })
                     }
                 }
             }
@@ -63,11 +79,32 @@ class Parser<A>(val parser: (ParseState) -> Trampoline<Option<Pair<A, ParseState
 
         // Alternative choice (associative operation)
         fun <A> alt(p: HKT<Parser<*>, A>, q: HKT<Parser<*>, A>): HKT<Parser<*>, A> =
+//            Parser { ps ->
+//                narrow(p).runParser(ps) `≻≻=` { res1 ->
+//                    when (res1) {
+//                        is Result.Success -> Trampoline.done(res1)
+//                        is Result.Failure -> {
+//                            if (res1.getConsumed() || res1.coerceAbort())
+//                                Trampoline.done(res1)
+//                            else
+//                                Trampoline.more {
+//                                    narrow(q).runParser(ps) `≻≻=` { res2 ->
+//                                        when (res2) {
+//                                            is Result.Success -> Trampoline.done(res2)
+//                                            is Result.Failure ->
+//                                                Trampoline.done(Result.Failure(FailContext(res2.getParseState(), res2.getConsumed(), res2.coerceAbort())))
+//                                        }
+//                                    }
+//                                }
+//                        }
+//                    }
+//                }
+//            }
             Parser { ps ->
                 narrow(p).runParser(ps) `≻≻=` { res1 ->
                     when (res1) {
-                        is Option.Some -> Trampoline.done(res1)
-                        is Option.None -> narrow(q).runParser(ps)
+                        is Result.Success -> Trampoline.done(res1)
+                        is Result.Failure -> narrow(q).runParser(ps)
                     }
                 }
             }

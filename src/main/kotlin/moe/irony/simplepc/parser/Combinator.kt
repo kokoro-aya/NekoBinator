@@ -1,12 +1,15 @@
 package moe.irony.simplepc.parser
 
+import moe.irony.simplepc.instances.Either
 import moe.irony.simplepc.instances.Option
+import moe.irony.simplepc.instances.Result
 import moe.irony.simplepc.parser.Parser.Companion.`*≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺$≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺*`
 import moe.irony.simplepc.parser.Parser.Companion.`≺*≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺|≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
+import moe.irony.simplepc.parser.Parser.Companion.attempt
 import moe.irony.simplepc.parser.Parser.Companion.combine
 import moe.irony.simplepc.parser.Parser.Companion.pure
 import moe.irony.simplepc.types.HKT
@@ -18,9 +21,9 @@ import moe.irony.simplepc.utils.*
 fun identity(): Parser<Char> = Parser {
     Trampoline.done(
         if (it.hasNext())
-            Option.Some(it.peek() to it.next())
+            Result.Success(Context(it.next(), true, it.peek()))
         else
-            Option.None)
+            Result.Failure(FailContext(it, consumed = false, halted = false)))
 }
 
 fun eof(): Parser<Char> = TODO("Not yet implemented")
@@ -51,15 +54,7 @@ fun anyString(): HKT<Parser<*>, String> =
 fun <A, B, C> tryAndThen(p: HKT<Parser<*>, A>, q: HKT<Parser<*>, B>, f: (A, B) -> C, or: (B) -> C): HKT<Parser<*>, C> =
     (p `≻≻=` { x -> q `≻≻=` { y -> pure(f(x, y)) }}) `≺|≻` (q `≻≻=` { pure(or(it)) })
 
-fun <A> tryParse(p: HKT<Parser<*>, A>): HKT<Parser<*>, A> = // TODO("Encountered a problem")
-    Parser { ps ->
-        Parser.narrow(p).runParser(ps) `≻≻=` { res ->
-            when (res) {
-                is Option.Some -> Trampoline.done(res)
-                is Option.None -> Trampoline.done(Option.None)
-            }
-        }
-    } `≺|≻` p
+fun <A> tryParse(p: HKT<Parser<*>, A>): HKT<Parser<*>, A> = attempt(p) // FIXED
 
 fun <A> choice(desc: String, ps: List<HKT<Parser<*>, A>>): HKT<Parser<*>, A> = TODO("Not yet implemented")
 
@@ -81,6 +76,12 @@ fun <A> replicate(n: Int, p: HKT<Parser<*>, A>): HKT<Parser<*>, List<A>> =
             Parser.pure(cons<A>()(a)(ax))
         }
     }
+
+fun <A, B> runLoop(a: A, f: (A) -> HKT<Parser<*>, Either<B, A>>): HKT<Parser<*>, B> =
+    f.invoke(a) `≻≻=` { ei -> when (ei) {
+        is Either.Left -> pure(ei.a)
+        is Either.Right -> runLoop(ei.b, f)
+    } }
 
 fun <A> many(p: HKT<Parser<*>, A>): HKT<Parser<*>, List<A>> =
     recur { many1(p) `≺|≻` Parser.pure(listOf()) }

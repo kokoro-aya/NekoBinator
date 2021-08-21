@@ -1,32 +1,36 @@
 package moe.irony.simplepc
 
 import moe.irony.simplepc.instances.Option
+import moe.irony.simplepc.instances.Result
 import moe.irony.simplepc.parser.ParseState
 import moe.irony.simplepc.parser.Parser
 import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
+import moe.irony.simplepc.parser.Parser.Companion.empty
+import moe.irony.simplepc.parser.Parser.Companion.pure
 import moe.irony.simplepc.utils.Trampoline
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class ParserTest {
     @Test
     fun basicParserTest() {
-        assertEquals(Option.Some(1024), Parser { Trampoline.done(Option.Some(1024 to it)) }.parse(""))
-        assertEquals(Option.None, Parser { Trampoline.done<Option<Pair<*, ParseState>>>(Option.None) }.parse(""))
+        assertEquals(Result.Success(1024), Parser.narrow(pure(1024)).parse(""))
+        assertTrue(Parser.narrow(empty<Int>()).parse("") is Result.Failure)
     }
 
     @Test
     fun monadicParserTest() {
-        assertEquals(Option.Some(3), Parser.narrow(
+        assertEquals(Result.Success(3), Parser.narrow(
             Parser.pure(1) `≻≻=` { x ->
                 Parser.pure(2) `≻≻=` { y ->
                     Parser.pure(x + y)
             } }).parse(""))
-        assertEquals(Option.None, Parser.narrow(
+        assertTrue(Parser.narrow(
             Parser.pure(1) `≻≻=` { x ->
                 Parser.empty<Int>() `≻≻=` { y ->
                     Parser.pure(x + y)
-            } }).parse(""))
+            } }).parse("") is Result.Failure)
 
         // TODO: 20/08/2021 Tests on more monadic operations
     }

@@ -23,8 +23,3 @@ fun term(): HKT<Parser<*>, Int> =
 fun factor(): HKT<Parser<*>, Int> =
     recur { (symbol("(") `*≻` expr() `≺*` symbol(")")) `≺|≻` natural() }
 
-fun parseInt(s: String): Int? = when (val p = Parser.narrow(expr()).parse(s)) {
-    is Option.Some -> p.value
-    is Option.None -> null
-}
-
