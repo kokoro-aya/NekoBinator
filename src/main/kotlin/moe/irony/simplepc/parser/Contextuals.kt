@@ -4,11 +4,16 @@ import moe.irony.simplepc.instances.Option
 import moe.irony.simplepc.instances.Result
 
 class Context<A>(val state: ParseState, val consumed: Boolean, val result: A) {
-
+    operator fun component1(): ParseState = state
+    operator fun component2(): Boolean = consumed
+    operator fun component3(): A = result
 }
 
 class FailContext(val state: ParseState, val consumed: Boolean, val halted: Boolean): Throwable() {
     override fun toString(): String = "Context:: $state, consumed: $consumed, halted: $halted"
+    operator fun component1(): ParseState = state
+    operator fun component2(): Boolean = consumed
+    operator fun component3(): Boolean = halted
 }
 
 fun <A> Result<Context<A>>.getParseState(): ParseState = when (this) {

@@ -11,6 +11,7 @@ import moe.irony.simplepc.parser.Parser.Companion.`≺|≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
 import moe.irony.simplepc.parser.Parser.Companion.attempt
 import moe.irony.simplepc.parser.Parser.Companion.combine
+import moe.irony.simplepc.parser.Parser.Companion.narrow
 import moe.irony.simplepc.parser.Parser.Companion.pure
 import moe.irony.simplepc.types.HKT
 import moe.irony.simplepc.types.Tuple0
@@ -49,8 +50,12 @@ fun matchString(str: String): HKT<Parser<*>, String> =
 fun anyString(): HKT<Parser<*>, String> =
     (List<Char>::constructString) `≺$≻` many1(isLetter())
 
+fun asterisk(p: HKT<Parser<*>, String>): HKT<Parser<*>, String> =
+    tryParse(p) `≺|≻` pure("")
+
 // Combinators
 
+@Deprecated("Use asterisk() instead")
 fun <A, B, C> tryAndThen(p: HKT<Parser<*>, A>, q: HKT<Parser<*>, B>, f: (A, B) -> C, or: (B) -> C): HKT<Parser<*>, C> =
     (p `≻≻=` { x -> q `≻≻=` { y -> pure(f(x, y)) }}) `≺|≻` (q `≻≻=` { pure(or(it)) })
 
@@ -89,9 +94,9 @@ fun <A> many(p: HKT<Parser<*>, A>): HKT<Parser<*>, List<A>> =
 fun <A> many1(p: HKT<Parser<*>, A>): HKT<Parser<*>, List<A>> =
     recur { cons<A>() `≺$≻` p `≺*≻` many(p) }
 
-fun <A, S> sepBy(p: HKT<Parser<*>, A>, s: HKT<Parser<*>, S>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
+infix fun <A, S> (HKT<Parser<*>, A>).sepBy(s: HKT<Parser<*>, S>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
 
-fun <A, S> sepBy1(p: HKT<Parser<*>, A>, s: HKT<Parser<*>, S>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
+infix fun <A, S> (HKT<Parser<*>, A>).sepBy1(s: HKT<Parser<*>, S>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
 
 fun <A> skipMany(p: HKT<Parser<*>, A>): HKT<Parser<*>, Tuple0> =
     recur { Parser.pure(Tuple0) `≺*` many(p) }
@@ -99,13 +104,13 @@ fun <A> skipMany(p: HKT<Parser<*>, A>): HKT<Parser<*>, Tuple0> =
 fun <A> skipMany1(p: HKT<Parser<*>, A>): HKT<Parser<*>, Tuple0> =
     recur { p `*≻` skipMany(p) }
 
-fun <A, B> endBy(p: HKT<Parser<*>, A>, sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
+infix fun <A, B> (HKT<Parser<*>, A>).endBy(sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
 
-fun <A, B> endBy1(p: HKT<Parser<*>, A>, sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
+infix fun <A, B> (HKT<Parser<*>, A>).endBy1(sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
 
-fun <A, B> endByOptional(p: HKT<Parser<*>, A>, sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
+infix fun <A, B> (HKT<Parser<*>, A>).endByOptional(sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
 
-fun <A, B> endByOptional1(p: HKT<Parser<*>, A>, sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
+infix fun <A, B> (HKT<Parser<*>, A>).endByOptional1(sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> = TODO("Not yet implemented")
 
 fun <A> chainl1(p: HKT<Parser<*>, A>, op: HKT<Parser<*>, (A, A) -> A>): HKT<Parser<*>, A> =
     p `≻≻=` { x ->

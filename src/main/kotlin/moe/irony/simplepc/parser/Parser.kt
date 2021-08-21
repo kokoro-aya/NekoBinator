@@ -42,22 +42,22 @@ class Parser<A>(val parser: (ParseState) -> Trampoline<Result<Context<A>>>): HKT
             Parser { ps ->
                 narrow(ma).runParser(ps) `≻≻=` { res1 ->
                     when (res1) {
-                        is Result.Success -> {
-                            narrow(f.invoke(res1.value.result)).runParser(res1.value.state) `≻≻=` { res2 ->
+                        is Result.Success -> { val (pps, cc, rs) = res1.value
+                            narrow(f.invoke(rs)).runParser(pps) `≻≻=` { res2 ->
                                 Trampoline.more {
                                     when (res2) {
                                         is Result.Success -> Trampoline.done(
-                                            Result.Success(Context(res2.value.state, res1.value.consumed || res2.value.consumed, res2.value.result)))
-                                        is Result.Failure -> Trampoline.done(res2.let {
-                                            Result.Failure(FailContext(it.getParseState(), it.getConsumed() || res1.value.consumed, it.coerceAbort()))
+                                            Result.Success(res2.let { val (p2s, cc2, rs2) = res2.value
+                                                Context(p2s, cc || cc2, rs2)
+                                            }))
+                                        is Result.Failure -> Trampoline.done(res2.let { val (p2s, cc2, hlt) = it.failure as FailContext
+                                            Result.Failure(FailContext(p2s, cc2, hlt)) // Should we do this?
                                         })
                                     }
                                 }
                             }
                         }
-                        is Result.Failure -> Trampoline.done(res1.let {
-                            Result.Failure(FailContext(it.getParseState(), it.getConsumed(), it.coerceAbort()))
-                        })
+                        is Result.Failure -> Trampoline.done(Result.Failure(res1.failure))
                     }
                 }
             }
@@ -79,32 +79,24 @@ class Parser<A>(val parser: (ParseState) -> Trampoline<Result<Context<A>>>): HKT
 
         // Alternative choice (associative operation)
         fun <A> alt(p: HKT<Parser<*>, A>, q: HKT<Parser<*>, A>): HKT<Parser<*>, A> =
-//            Parser { ps ->
-//                narrow(p).runParser(ps) `≻≻=` { res1 ->
-//                    when (res1) {
-//                        is Result.Success -> Trampoline.done(res1)
-//                        is Result.Failure -> {
-//                            if (res1.getConsumed() || res1.coerceAbort())
-//                                Trampoline.done(res1)
-//                            else
-//                                Trampoline.more {
-//                                    narrow(q).runParser(ps) `≻≻=` { res2 ->
-//                                        when (res2) {
-//                                            is Result.Success -> Trampoline.done(res2)
-//                                            is Result.Failure ->
-//                                                Trampoline.done(Result.Failure(FailContext(res2.getParseState(), res2.getConsumed(), res2.coerceAbort())))
-//                                        }
-//                                    }
-//                                }
-//                        }
-//                    }
-//                }
-//            }
             Parser { ps ->
                 narrow(p).runParser(ps) `≻≻=` { res1 ->
                     when (res1) {
                         is Result.Success -> Trampoline.done(res1)
-                        is Result.Failure -> narrow(q).runParser(ps)
+                        is Result.Failure -> {
+                            if (res1.getConsumed() || res1.coerceAbort())
+                                Trampoline.done(res1)
+                            else
+                                Trampoline.more {
+                                    narrow(q).runParser(ps) `≻≻=` { res2 ->
+                                        when (res2) {
+                                            is Result.Success -> Trampoline.done(res2)
+                                            is Result.Failure ->
+                                                Trampoline.done(Result.Failure(FailContext(res2.getParseState(), res2.getConsumed(), res2.coerceAbort())))
+                                        }
+                                    }
+                                }
+                        }
                     }
                 }
             }
@@ -126,6 +118,9 @@ class Parser<A>(val parser: (ParseState) -> Trampoline<Result<Context<A>>>): HKT
         // Sequence actions, discarding the value of the first argument
         infix fun <A, B> HKT<Parser<*>, A>.`*≻`(q: HKT<Parser<*>, B>): HKT<Parser<*>, B> =
             this `≻≻=` { _ -> q `≻≻=` { b -> Parser.pure(b) } }
+
+        fun <A> sum(vararg p: HKT<Parser<*>, A>): HKT<Parser<*>, A> =
+            p.reduce(Companion::alt)
     }
 }
 

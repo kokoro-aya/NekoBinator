@@ -27,28 +27,37 @@ fun main() {
 //    println(p.parse("bar"))
 //    println(p.parse("foobar"))
 
-    println(Parser.narrow(many1(isDigit())).parse("1234abc"))
-    println(Parser.narrow(many1(isDigit())).parse("4567abc"))
-    println(Parser.narrow(many1(isDigit())).parse("89111abc"))
+//    println(Parser.narrow(many1(isDigit())).parse("1234abc"))
+//    println(Parser.narrow(many1(isDigit())).parse("4567abc"))
+//    println(Parser.narrow(many1(isDigit())).parse("89111abc"))
+//
+//    println(Parser.narrow(bcString()).parse("5:abcd"))
+//    println(Parser.narrow(bcString()).parse("4:abcd"))
+//    println(Parser.narrow(bcString()).parse("3:abcd"))
+//
+//    println()
+//
+//    println(Parser.narrow(tryParse(matchString("abc"))).parse("abcdefg"))
+//    println(Parser.narrow(tryParse(matchString("abc"))).parse("defg"))
+//
+//    println()
+//
+//    println(Parser.narrow(tryParse(matchString(""))).parse("abcdefg"))
+//
+//    println()
+//
+//    println(Parser.narrow((matchString("abc") `≺|≻` matchString("")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("abcdefg"))
+//
+//    println(Parser.narrow((matchString("abc") `≺|≻` matchString("")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("defg"))
+//
+//    println(Parser.narrow((tryParse(matchString("abc")) `≺|≻` matchString("")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("defg"))
+//
+//    println()
+//
+//    println(Parser.narrow(asterisk(matchString("abc")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("abcdefg"))
+//    println(Parser.narrow(asterisk(matchString("abc")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("defg"))
 
-    println(Parser.narrow(bcString()).parse("5:abcd"))
-    println(Parser.narrow(bcString()).parse("4:abcd"))
-    println(Parser.narrow(bcString()).parse("3:abcd"))
 
-    println()
-
-    println(Parser.narrow(tryParse(matchString("abc")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("abcdefg"))
-    println(Parser.narrow(tryParse(matchString("abc")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("defg"))
-
-    println()
-
-    println(Parser.narrow(tryParse(matchString("abc"))).parse("abcdefg"))
-    println(Parser.narrow(tryParse(matchString("abc"))).parse("defg"))
-
-    println()
-
-    println(Parser.narrow((matchString("") `≺|≻` matchString("abc")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("abcdefg"))
-
-    println(Parser.narrow((matchString("") `≺|≻` matchString("abc")) `≻≻=` { i -> matchString("def") `≻≻=` { j -> pure(i + j) }}).parse("defg"))
-
+    println(Parser.narrow(many(isDigit())).parse("1234"))
+    println(Parser.narrow(tryParse(many(isDigit()))).parse("1234abc"))
 }
