@@ -24,13 +24,13 @@ Currently there is a simple calculator on Int with add/minus/multiply/divide, mo
 
 ## TODO
 
-- More elementary parser combinators
-- Error handling (change Option to Either)
+- Error handling
 - A Bencode Parser
 - A Json Parser
 - A STLC Parser
 - A converter from chinese number to numeric representation and vice-versa
 - Test coverage
+- Documentation for different methods
 - ~~Implementation of do-notation~~
 
 ## notice

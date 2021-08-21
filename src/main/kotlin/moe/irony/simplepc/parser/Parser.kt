@@ -65,6 +65,9 @@ class Parser<A>(val parser: (ParseState) -> Trampoline<Result<Context<A>>>): HKT
         infix fun <A, B> HKT<Parser<*>, A>.`≻≻=`(f: (A) -> HKT<Parser<*>, B>): HKT<Parser<*>, B> =
             flatMap(this, f)
 
+        infix fun <A, B> HKT<Parser<*>, A>.`≻≻`(b: HKT<Parser<*>, B>): HKT<Parser<*>, B> =
+            flatMap(this) { b }
+
         // Functor fmap (<$>)
         fun <A, B> fmap(ma: HKT<Parser<*>, A>, f: (A) -> B): HKT<Parser<*>, B> =
             flatMap(ma) {

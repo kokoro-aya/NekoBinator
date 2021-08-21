@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "moe.irony"
-version = "1.1.1"
+version = "1.1.5"
 
 repositories {
     mavenCentral()
