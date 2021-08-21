@@ -1,4 +1,4 @@
-package moe.irony.simplepc.calculator
+package moe.irony.simplepc.applications.calculator
 
 import moe.irony.simplepc.instances.Option
 import moe.irony.simplepc.parser.*

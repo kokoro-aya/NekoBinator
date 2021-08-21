@@ -11,10 +11,7 @@ import moe.irony.simplepc.parser.Parser.Companion.combine
 import moe.irony.simplepc.parser.Parser.Companion.pure
 import moe.irony.simplepc.types.HKT
 import moe.irony.simplepc.types.Tuple0
-import moe.irony.simplepc.utils.Trampoline
-import moe.irony.simplepc.utils.`≻≻=`
-import moe.irony.simplepc.utils.cons
-import moe.irony.simplepc.utils.yCombinator
+import moe.irony.simplepc.utils.*
 
 // Basic Parsers
 
@@ -47,7 +44,7 @@ fun matchString(str: String): HKT<Parser<*>, String> =
     else matchChar(str.first()) `≻≻=` { c -> matchString(str.drop(1)) `≻≻=` { cs -> Parser.pure(c + cs) } }
 
 fun anyString(): HKT<Parser<*>, String> =
-    { ll: List<Char> -> ll.foldRight("") { i, x -> x + i } } `≺$≻` many1(isLetter())
+    (List<Char>::constructString) `≺$≻` many1(isLetter())
 
 // Combinators
 

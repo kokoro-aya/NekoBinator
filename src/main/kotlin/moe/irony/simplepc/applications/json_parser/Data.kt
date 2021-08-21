@@ -1,4 +1,4 @@
-package moe.irony.simplepc.json_parser
+package moe.irony.simplepc.applications.json_parser
 
 sealed class JsonValue {
 

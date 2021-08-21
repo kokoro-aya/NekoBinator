@@ -8,3 +8,6 @@ fun <A> cons(): (A) -> (List<A>) -> List<A> = { x -> { xx ->
     zz.add(x)
     zz
 }}
+
+fun List<Char>.constructString() =
+    this.foldRight("") { ch, acc -> acc + ch }
