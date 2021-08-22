@@ -1,3 +1,3 @@
 
-rootProject.name = "SimpleParserCombinator"
+rootProject.name = "NekoBinator"
 

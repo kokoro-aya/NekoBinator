@@ -115,12 +115,6 @@ sealed class Trampoline<A> {
     }
 }
 
-fun <T, U, V> ((T) -> U).andThen(after: (U) -> V): (T) -> V = { x ->
-    this.let { after(this.invoke(x)) }
-}
-
-
-
 infix fun <A, B> Trampoline<A>.`≻≻=`(f: (A) -> Trampoline<B>): Trampoline<B> =
     this.flatMap(f)
 

@@ -67,8 +67,6 @@ fun <A> tryParse(p: HKT<Parser<*>, A>): HKT<Parser<*>, A> = attempt(p) // FIXED
 fun <A> choice(desc: String, ps: List<HKT<Parser<*>, A>>): HKT<Parser<*>, A> =
     ps.reduce(Parser.Companion::alt)
 
-fun <A> count(n: Int, p: HKT<Parser<*>, A>): HKT<Parser<*>, List<A>> = replicate(n, p)
-
 fun <A, B, C> between(open: HKT<Parser<*>, B>, p: HKT<Parser<*>, A>, close: HKT<Parser<*>, C>): HKT<Parser<*>, A> =
     open `*≻` p `≺*` close
 
@@ -94,54 +92,53 @@ fun <A> replicate(n: Int, p: HKT<Parser<*>, A>): HKT<Parser<*>, List<A>> =
 fun <A, B> runLoop(a: A, f: (A) -> HKT<Parser<*>, Either<B, A>>): HKT<Parser<*>, B> =
     f.invoke(a) `≻≻=` { ei -> when (ei) {
         is Either.Left -> pure(ei.a)
-        is Either.Right -> runLoop(ei.b, f)
+        is Either.Right -> recur { runLoop(ei.b, f) }
     } }
 
 fun <A> many(p: HKT<Parser<*>, A>): HKT<Parser<*>, List<A>> =
-    recur { many1(p) `≺|≻` Parser.pure(listOf()) }
+    recur { many1(p) } `≺|≻` Parser.pure(listOf())
 
 fun <A> many1(p: HKT<Parser<*>, A>): HKT<Parser<*>, List<A>> =
-    recur { cons<A>() `≺$≻` p `≺*≻` many(p) }
+    cons<A>() `≺$≻` p `≺*≻` recur { many(p) }
 
 infix fun <A, S> (HKT<Parser<*>, A>).sepBy(s: HKT<Parser<*>, S>): HKT<Parser<*>, List<A>> =
-    recur { this sepBy1 s `≺|≻` Parser.pure(listOf()) }
+    recur { this sepBy1 s } `≺|≻` Parser.pure(listOf())
 
 infix fun <A, S> (HKT<Parser<*>, A>).sepBy1(s: HKT<Parser<*>, S>): HKT<Parser<*>, List<A>> =
-    recur {
-        this `≻≻=` { a ->
+    this `≻≻=` { a ->
+        recur {
             many(s `≻≻` this) `≻≻=` { xs ->
                 pure(cons<A>()(a)(xs))
-            }
-        }
+        } }
     }
 
 fun <A> skipMany(p: HKT<Parser<*>, A>): HKT<Parser<*>, Tuple0> =
-    recur { Parser.pure(Tuple0) `≺*` many(p) }
+    Parser.pure(Tuple0) `≺*` recur { many(p) }
 
 fun <A> skipMany1(p: HKT<Parser<*>, A>): HKT<Parser<*>, Tuple0> =
-    recur { p `*≻` skipMany(p) }
+    p `*≻` recur { skipMany(p) }
 
 infix fun <A, B> (HKT<Parser<*>, A>).endBy(sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> =
-    many(this `≻≻=` { a ->
+    recur { many(this `≻≻=` { a ->
         sep `≻≻=` { _ ->
             pure(a)
         }
-    })
+    }) }
 
 infix fun <A, B> (HKT<Parser<*>, A>).endBy1(sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> =
-    many1(this `≻≻=` { a ->
+    recur { many1(this `≻≻=` { a ->
         sep `≻≻=` { _ ->
             pure(a)
         }
-    })
+    }) }
 
 infix fun <A, B> (HKT<Parser<*>, A>).endByOptional(sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> =
-    this endByOptional1 sep `≺|≻` pure(listOf<A>())
+    recur { this endByOptional1 sep } `≺|≻` pure(listOf<A>())
 
 infix fun <A, B> (HKT<Parser<*>, A>).endByOptional1(sep: HKT<Parser<*>, B>): HKT<Parser<*>, List<A>> =
     this `≻≻=` { x ->
         sep `≻≻=` { _ ->
-            this endByOptional sep `≻≻=` { xs ->
+            recur { this endByOptional sep } `≻≻=` { xs ->
                 pure(cons<A>()(x)(xs))
             }
         } `≺|≻` pure(listOf(x))
@@ -185,8 +182,7 @@ fun symbol(str: String): HKT<Parser<*>, String> =
     skipSpaces() `*≻` matchString(str) `≺*` skipSpaces()
 
 fun natural(): HKT<Parser<*>, Int> =
-    skipSpaces() `*≻` ({
-            ll: List<Char> -> ll.foldRight(0) { i, x -> x * 10 + (i - '0') } } `≺$≻` many1(isDigit())) `≺*` skipSpaces()
+    skipSpaces() `*≻` ((List<Char>::constructInt) `≺$≻` many1(isDigit())) `≺*` skipSpaces()
 
 fun real(): HKT<Parser<*>, Double> =
     skipSpaces() `*≻` natural().combine({ ll: List<Char> ->

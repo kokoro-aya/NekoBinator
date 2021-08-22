@@ -90,7 +90,7 @@ class Parser<A>(val parser: (ParseState) -> Trampoline<Result<Context<A>>>): HKT
                             if (res1.getConsumed() || res1.coerceAbort())
                                 Trampoline.done(res1)
                             else
-                                Trampoline.more {
+                                Trampoline.more { // Could we remove this `more`?
                                     narrow(q).runParser(ps) `≻≻=` { res2 ->
                                         when (res2) {
                                             is Result.Success -> Trampoline.done(res2)
