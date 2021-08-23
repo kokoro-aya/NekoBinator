@@ -61,3 +61,6 @@ fun main() {
     println(Parser.narrow(many(isDigit())).parse("1234"))
     println(Parser.narrow(tryParse(many(isDigit()))).parse("1234abc"))
 }
+
+// TODO: Test * == (+)? or * == (?)+ and others
+// TODO: Should we change every signature with HKT to narrowed Parser?

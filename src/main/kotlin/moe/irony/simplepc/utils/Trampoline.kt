@@ -97,7 +97,7 @@ sealed class Trampoline<A> {
         return tco.coerceLeft()
     }
 
-    fun run(): A {
+    private fun run1(): A {
         var tco = Either.narrow(Either.pure<A, Trampoline<A>>(this))
         while (tco.isRight()) {
             tco = when (val ta = tco.coerceRight().resume()) {
@@ -107,6 +107,17 @@ sealed class Trampoline<A> {
         }
         return tco.coerceLeft()
     }
+
+    private tailrec fun recursiveRun_(tco: Either<A, Trampoline<A>>): A =
+        if (tco.isRight())
+            recursiveRun_(when (val ta = tco.coerceRight().resume()) {
+                is Either.Left -> Either.Left(ta.a)
+                is Either.Right -> Either.Right(ta.b.invoke())
+            })
+        else
+            tco.coerceLeft()
+
+    fun run(): A = recursiveRun_(Either.narrow(Either.pure(this)))
 
     companion object {
         fun <A> done(a: A): Trampoline<A> = Done(a)
@@ -127,6 +138,40 @@ private fun iterate(i: Int): Trampoline<String> =
         Trampoline.done(x + Random.nextInt('a'.toInt(), 'z'.toInt()).toChar() )
     }
 
+private fun slowFib(i: Int): Trampoline<Int> =
+    if (i <= 1) Trampoline.done(i)
+    else Trampoline.more { slowFib(i - 1) } `≻≻=` { x ->
+        Trampoline.more { slowFib(i - 2) } `≻≻=` { y ->
+            Trampoline.done(x + y)
+        }
+    }
+
 fun main() {
-    println(iterate(50).run())
+//    println(iterate(50).run())
+
+//    val t1 = System.currentTimeMillis()
+//    println(slowFib(20).run1())
+//    println("Elapsed time: ${System.currentTimeMillis() - t1}")
+//
+//    val t2 = System.currentTimeMillis()
+//    println(slowFib(20).run())
+//    println("Elapsed time: ${System.currentTimeMillis() - t2}")
+//
+//    val t11 = System.currentTimeMillis()
+//    println(slowFib(25).run1())
+//    println("Elapsed time: ${System.currentTimeMillis() - t11}")
+//
+//    val t21 = System.currentTimeMillis()
+//    println(slowFib(25).run())
+//    println("Elapsed time: ${System.currentTimeMillis() - t21}")
+//
+//    val t12 = System.currentTimeMillis()
+//    println(slowFib(30).run1())
+//    println("Elapsed time: ${System.currentTimeMillis() - t12}")
+//
+//    val t22 = System.currentTimeMillis()
+//    println(slowFib(30).run())
+//    println("Elapsed time: ${System.currentTimeMillis() - t22}")
+
+
 }
