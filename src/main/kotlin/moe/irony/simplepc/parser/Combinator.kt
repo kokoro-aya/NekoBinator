@@ -44,7 +44,7 @@ fun anyChar(): Parser<Char> = satisfy { true }
 fun isDigit(): Parser<Char> = satisfy { it.isDigit() }
 fun isLetter(): Parser<Char> = satisfy { it.isLetter() }
 fun matchChar(c: Char): Parser<Char> = satisfy { it == c }
-fun spaces(): Parser<Char> = satisfy { it.isWhitespace() }
+fun spaces(): Parser<Char> = satisfy { it.isWhitespace() } // TODO should be renamed to space()
 
 fun matchString(str: String): HKT<Parser<*>, String> =
     if (str.isEmpty()) Parser.pure(str) // 这里不能用Parser.empty()否则会出现None导致整个调用栈被污染 // TODO，似乎有问题，如果我想要匹配一个字符串但不需要用到它的值呢？

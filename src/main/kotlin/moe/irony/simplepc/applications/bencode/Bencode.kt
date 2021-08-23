@@ -56,34 +56,3 @@ fun bList(): HKT<Parser<*>, List<Bencode>> =
 
 fun bencode(): HKT<Parser<*>, Bencode> =
     recur { Parser.empty<Bencode>() `≺|≻` ((::BInteger) `≺$≻` bInteger()) `≺|≻` ((::BString) `≺$≻` bString()) `≺|≻` ((::BDictionary) `≺$≻` bDictionary()) `≺|≻` ((::BList) `≺$≻` (bList())) }
-
-fun main() {
-    println(Parser.narrow(bencode()).parse("4:fooo"))
-    println(Parser.narrow(bencode()).parse("0:"))
-    println(Parser.narrow(bencode()).parse("i32e"))
-    println(Parser.narrow(bencode()).parse("i-2e"))
-
-    println(Parser.narrow(bencode()).parse("l4:spam4:eggse"))
-    println(Parser.narrow(bencode()).parse("le"))
-
-    println(Parser.narrow(bencode()).parse("d3:cow3:moo4:spam4:eggse"))
-    println(Parser.narrow(bencode()).parse("d4:spaml1:a1:bee"))
-    println(Parser.narrow(bencode()).parse("d9:publisher3:bob17:publisher-webpage15:www.example.com18:publisher.location4:homee"))
-    println(Parser.narrow(bencode()).parse("de"))
-
-
-    println(Parser.narrow(bencode()).parse("5:fooo"))
-    println(Parser.narrow(bencode()).parse(":"))
-    println(Parser.narrow(bencode()).parse("i3"))
-    println(Parser.narrow(bencode()).parse("2e"))
-
-    println(Parser.narrow(bencode()).parse("l4:spa4:eggse"))
-    println(Parser.narrow(bencode()).parse("l"))
-    println(Parser.narrow(bencode()).parse("e"))
-
-    println(Parser.narrow(bencode()).parse("d3:cow:moo4:sam4eggse"))
-    println(Parser.narrow(bencode()).parse("d4:spaml1:a1:be"))
-    println(Parser.narrow(bencode()).parse("d4:spaml1:a1:bele"))
-    println(Parser.narrow(bencode()).parse("d9:publisher3:bob17:publisher-webpage15:www.examle.com18:publisher.location4:homee"))
-    println(Parser.narrow(bencode()).parse(""))
-}
