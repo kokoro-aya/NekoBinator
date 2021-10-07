@@ -8,5 +8,5 @@ class ParseState(val s: String, val p: Int = 0) {
 
     fun next(): ParseState = ParseState(s, p + 1)
 
-    override fun toString(): String = "State { $s, at: $p }"
+    override fun toString(): String = "State { ${ if (s.length > 1000) "${s.take(1000)} ..." else s }, at: $p }"
 }

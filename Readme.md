@@ -1,5 +1,7 @@
 # NekoBinator
 
+> The project is under revision, it might be dropped or totally rewritten in the Future. Also, codes in the repo need to be cleaned
+
 A simple parser combinator written in Kotlin.
 
 An attempt to implement parser combinator from scratch after having read the "十分钟魔法练习".
@@ -23,19 +25,7 @@ Currently there is a simple calculator on Int with add/minus/multiply/divide and
 
 - A monadic parser
 - Several combinators
-- A simple calculator as a demo
-- A Bencode Parser
-
-## TODO
-
-- Do Notations
-- Error handling
-- A Json Parser
-- A STLC Parser
-- A converter from chinese number to numeric representation and vice-versa
-- Regex Support (pure fp mode and performance mode)
-- Test coverage
-- Documentation for different methods
+- A simple calculator, a Bencode Parser and a Json Parser as a demo (some bugs exist)
 
 ## Notice
 
@@ -131,7 +121,7 @@ Several infix operators have been defined. The symbol `≺` and `≻` has been u
 -   `isDigit()`
 -   `isLetter()`
 -   `matchChar(c:)`
--   `spaces()`
+-   `space()`
 -   `matchString(str:)`
 -   `anyString()`
 -   `asterisk(p:)`

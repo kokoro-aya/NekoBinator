@@ -84,22 +84,24 @@ private fun String(): HKT<Parser<*>, String> = (List<Char>::constructString) `�
 
 private fun matchHex() = satisfy { it in "0123456789abcdefABCDEF" }
 
-private fun StringFragment() = satisfy { it !in "\"\\" } `≺|≻` (matchChar('\\') `*≻`
-        ((satisfy { it in listOf('"', '\\', '/', 'b', 'n', 'r', 't') } `≻≻=` { ch: Char ->
-            when (ch) {
-                '"' -> pure('"')
-                '\\' -> pure('\\')
-                '/' -> pure('/')
-                'b' -> pure('\b')
-                'n' -> pure('\n')
-                'r' -> pure('\r')
-                't' -> pure('\t')
-                else -> empty()
-            } }) `≺|≻`
-            (matchChar('u') `*≻` ({ xx: List<Char> ->
-                xx.foldRight(0) { a, b -> a.digitToInt(16) + b * 10 }.toChar()
-            } `≺$≻` replicate(4, matchHex()))))
-        )
+private fun StringFragment() = satisfy { it != '"' }
+
+//private fun StringFragment() = satisfy { it !in "\"\\" } `≺|≻` (matchChar('\\') `*≻`
+//        ((satisfy { it in listOf('"', '\\', '/', 'b', 'n', 'r', 't') } `≻≻=` { ch: Char ->
+//            when (ch) {
+//                '"' -> pure('"')
+//                '\\' -> pure('\\')
+//                '/' -> pure('/')
+//                'b' -> pure('\b')
+//                'n' -> pure('\n')
+//                'r' -> pure('\r')
+//                't' -> pure('\t')
+//                else -> empty()
+//            } }) `≺|≻`
+//            (matchChar('u') `*≻` ({ xx: List<Char> ->
+//                xx.foldRight(0) { a, b -> a.digitToInt(16) + b * 10 }.toChar()
+//            } `≺$≻` replicate(4, matchHex()))))
+//        )
 
 // ------- //
 //  Value  //
@@ -116,7 +118,7 @@ private fun Value(): HKT<Parser<*>, JsonValue> =
             JsonObject(xx.associate { it }) } `≺$≻` Object()) `≺|≻`
         ((::JsonArray) `≺$≻` Array()) `≺|≻`
         (matchString("true") `*≻` pure(JsonBool(true))) `≺|≻`
-        (matchString("false") `*≻` pure(JsonBool(false))) `≺|≻` // TODO 测试这里matchString的行为
+        (matchString("false") `*≻` pure(JsonBool(false))) `≺|≻` // TODO 测试这里matchString的行为，maybe matchStringStrict
         (matchString("null") `*≻` pure(JsonNull))) `≺*` Whitespace()
     }
 
@@ -163,10 +165,10 @@ fun main() {
     println(Parser.narrow(Number()).parse("-.E3"))
 
     println(Parser.narrow(String()).parse("\"abcdefoobar123\""))
-    println(Parser.narrow(String()).parse("\"abc\\\\z\\bzz\\n\\tee\\r3333\""))
+    println(Parser.narrow(String()).parse("\"abc\\zzzz\bzzffff\n\teeeee\r3333\""))
     println(Parser.narrow(String()).parse("\"\""))
-    println(Parser.narrow(String()).parse("\"\\u227a\""))
-    println(Parser.narrow(String()).parse("\"abc\\u227a\\u227B\""))
+    println(Parser.narrow(String()).parse("\"\u227a\""))
+    println(Parser.narrow(String()).parse("\"abc\u227a\u227B\""))
     println(Parser.narrow(String()).parse("\""))
 
     println(Parser.narrow(Value()).parse("\"foo\""))

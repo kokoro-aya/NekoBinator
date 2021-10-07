@@ -12,12 +12,9 @@ import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
 import moe.irony.simplepc.parser.Parser.Companion.`≻≻`
 import moe.irony.simplepc.parser.Parser.Companion.attempt
 import moe.irony.simplepc.parser.Parser.Companion.combine
-import moe.irony.simplepc.parser.Parser.Companion.empty
-import moe.irony.simplepc.parser.Parser.Companion.narrow
 import moe.irony.simplepc.parser.Parser.Companion.pure
 import moe.irony.simplepc.types.HKT
 import moe.irony.simplepc.types.Tuple0
-import moe.irony.simplepc.types.liftM1
 import moe.irony.simplepc.utils.*
 
 // Basic Parsers
@@ -44,10 +41,14 @@ fun anyChar(): Parser<Char> = satisfy { true }
 fun isDigit(): Parser<Char> = satisfy { it.isDigit() }
 fun isLetter(): Parser<Char> = satisfy { it.isLetter() }
 fun matchChar(c: Char): Parser<Char> = satisfy { it == c }
-fun spaces(): Parser<Char> = satisfy { it.isWhitespace() } // TODO should be renamed to space()
+fun space(): Parser<Char> = satisfy { it.isWhitespace() }
 
 fun matchString(str: String): HKT<Parser<*>, String> =
-    if (str.isEmpty()) Parser.pure(str) // 这里不能用Parser.empty()否则会出现None导致整个调用栈被污染 // TODO，似乎有问题，如果我想要匹配一个字符串但不需要用到它的值呢？
+    if (str.isEmpty()) Parser.pure(str) // 这里不能用Parser.empty()否则会出现None导致整个调用栈被污染
+    else matchChar(str.first()) `≻≻=` { c -> matchString(str.drop(1)) `≻≻=` { cs -> Parser.pure(c + cs) } }
+
+fun matchStringStrict(str: String): HKT<Parser<*>, String> = // 如果我想要匹配一个字符串但不需要用到它的值
+    if (str.isEmpty()) Parser.empty()
     else matchChar(str.first()) `≻≻=` { c -> matchString(str.drop(1)) `≻≻=` { cs -> Parser.pure(c + cs) } }
 
 fun anyString(): HKT<Parser<*>, String> =
@@ -176,7 +177,7 @@ fun <A> lookAhead(p: HKT<Parser<*>, A>): HKT<Parser<*>, A> =
 // Applications
 
 fun skipSpaces(): HKT<Parser<*>, Tuple0> =
-    skipMany(spaces())
+    skipMany(space())
 
 fun symbol(str: String): HKT<Parser<*>, String> =
     skipSpaces() `*≻` matchString(str) `≺*` skipSpaces()
