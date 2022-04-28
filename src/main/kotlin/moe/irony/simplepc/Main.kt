@@ -1,5 +1,9 @@
 package moe.irony.simplepc
 
+import moe.irony.simplepc.applications.anyChar
+import moe.irony.simplepc.applications.isDigit
+import moe.irony.simplepc.applications.natural
+import moe.irony.simplepc.applications.symbol
 import moe.irony.simplepc.parser.*
 import moe.irony.simplepc.parser.Parser.Companion.`≺$≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺*`

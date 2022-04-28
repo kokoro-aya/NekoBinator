@@ -1,12 +1,14 @@
 package moe.irony.simplepc.applications.bencode
 
+import moe.irony.simplepc.applications.anyChar
+import moe.irony.simplepc.applications.isDigit
+import moe.irony.simplepc.applications.matchChar
 import moe.irony.simplepc.parser.*
 import moe.irony.simplepc.parser.Parser.Companion.`*≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺$≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺*`
 import moe.irony.simplepc.parser.Parser.Companion.`≺|≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
-import moe.irony.simplepc.parser.Parser.Companion.pure
 import moe.irony.simplepc.types.HKT
 import moe.irony.simplepc.utils.constructLong
 import moe.irony.simplepc.utils.constructString

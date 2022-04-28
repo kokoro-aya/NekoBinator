@@ -1,6 +1,9 @@
 package moe.irony.simplepc.applications.calculator
 
-import moe.irony.simplepc.instances.Option
+import moe.irony.simplepc.applications.matchChar
+import moe.irony.simplepc.applications.natural
+import moe.irony.simplepc.applications.skipSpaces
+import moe.irony.simplepc.applications.symbol
 import moe.irony.simplepc.parser.*
 import moe.irony.simplepc.parser.Parser.Companion.`*≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺$≻`

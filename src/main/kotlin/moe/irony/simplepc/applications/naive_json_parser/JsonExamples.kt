@@ -1,6 +1,4 @@
-package moe.irony.simplepc.applications.json_parser
-
-import java.io.File
+package moe.irony.simplepc.applications.naive_json_parser
 
 val example1 = """
 {

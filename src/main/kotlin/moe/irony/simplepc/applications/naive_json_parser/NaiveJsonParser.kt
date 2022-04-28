@@ -1,13 +1,15 @@
-package moe.irony.simplepc.applications.json_parser
+package moe.irony.simplepc.applications.naive_json_parser
 
+import moe.irony.simplepc.applications.isDigit
+import moe.irony.simplepc.applications.matchChar
+import moe.irony.simplepc.applications.matchString
+import moe.irony.simplepc.applications.satisfy
 import moe.irony.simplepc.parser.*
 import moe.irony.simplepc.parser.Parser.Companion.`*≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺$≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≺*`
 import moe.irony.simplepc.parser.Parser.Companion.`≺|≻`
 import moe.irony.simplepc.parser.Parser.Companion.`≻≻=`
-import moe.irony.simplepc.parser.Parser.Companion.`≻≻`
-import moe.irony.simplepc.parser.Parser.Companion.empty
 import moe.irony.simplepc.parser.Parser.Companion.pure
 import moe.irony.simplepc.types.HKT
 import moe.irony.simplepc.types.Tuple0
@@ -16,6 +18,8 @@ import moe.irony.simplepc.utils.cons
 import moe.irony.simplepc.utils.constructInt
 import moe.irony.simplepc.utils.constructLong
 import moe.irony.simplepc.utils.constructString
+
+// Cannot handle large json files as it could loop
 
 // ------------ //
 //  Whitespace  //
