@@ -31,6 +31,10 @@ Currently there is a simple calculator on Int with add/minus/multiply/divide and
 
 - Windows platform is not supported as special characters are used in infix methods' names.
 - The project may encounter performance issues.
+- **Like any naive PC implementation, this project has several issues:**
+  - The parser will loop on left recursive grammar
+  - The parser cannot handle ambiguous grammar
+  - And the parser has a backtracking nature
 
 ## Introduction
 
@@ -110,12 +114,31 @@ Several infix operators have been defined. The symbol `≺` and `≻` has been u
 
 ### Combinators
 
-#### Basic Parsers
+#### Basic Combinators
+
+- `tryParse(p:)`
+- `choice(desc:ps:)`
+- `between(open:p:close:)`
+- `orElse(p:opt:)`
+- `tryDiscard(p:)`
+- `replicate(n:p:)`
+- `runLoop(a:f:)`
+- `many(p:)` and `many1(p:)`
+- `p sepBy s` and `p sepBy1 s`
+- `skipMany(p:)` and `skipMany1(p:)`
+- `p endBy sep` and `p endBy1 sep`
+- `p endByOptional sep` and `p endByOptional1 sep`
+- `chainl(p:op:x:)` and `chainl1(p:op:)`
+- `lookAhead(p:)`
+
+#### Combinator on Texts
+
+##### Basic Parsers
 
 -   `identity()`
 -   `satisfy(pred:)`
 
-#### Text Parsers
+##### Text Parsers
 
 -   `anyChar()`
 -   `isDigit()`
@@ -125,26 +148,6 @@ Several infix operators have been defined. The symbol `≺` and `≻` has been u
 -   `matchString(str:)`
 -   `anyString()`
 -   `asterisk(p:)`
-
-#### Combinators
-
--   `tryParse(p:)`
--   `choice(desc:ps:)`
--   `between(open:p:close:)`
--   `orElse(p:opt:)`
--   `tryDiscard(p:)`
--   `replicate(n:p:)`
--   `runLoop(a:f:)`
--   `many(p:)` and `many1(p:)`
--   `p sepBy s` and `p sepBy1 s`
--   `skipMany(p:)` and `skipMany1(p:)`
--   `p endBy sep` and `p endBy1 sep`
--   `p endByOptional sep` and `p endByOptional1 sep`
--   `chainl(p:op:x:)` and `chainl1(p:op:)`
--   `lookAhead(p:)`
-
-#### Several Applications
-
 -   `skipSpaces()`
 -   `symbol(str:)`
 -   `natural()`
@@ -153,6 +156,9 @@ Several infix operators have been defined. The symbol `≺` and `≻` has been u
 ### Examples
 
 Here's a sample calculator implemented using NekoBinator:
+
+Warning: this code is just to present the idea of parser combinator, it is not intended to be used on large
+inputs. Besides, this grammar and definition of PC in this way is not suitable for large input as it may loop.
 
 ```kotlin
 fun expr(): HKT<Parser<*>, Int> =
