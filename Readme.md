@@ -1,6 +1,8 @@
 # NekoBinator
 
-> The project is under revision, it might be dropped or totally rewritten in the Future. Also, codes in the repo need to be cleaned
+> Archived, in favor of projects for PC using Haskell. Using Kotlin to implement PC could be hard in lecture as well as in maintain.
+> 
+> 该仓库已封存。用Kotlin写Parser Combinator确实可能不是很好的想法。打算直接用Haskell来搞。
 
 A simple parser combinator written in Kotlin.
 
